@@ -1,0 +1,29 @@
+model:
+  input_dim: 310
+  num_classes: 3
+  adaptation_param: 'auto'
+# defalut: adaptation_param = 0.1
+
+train:
+  num_epochs: 200
+  learning_rate: 1e-4
+  # non default domain_learning_rate: 1e-4
+  domain_loss_weight: 0.5
+  weight_decay: 0.0
+  batch_size: 64
+  workers: 4
+#  momentum: 0.9
+
+
+
+basic:
+  seed: 2022
+  data_path: '../../data/data.pkl'
+  target_sub: 'sub_1'
+# default target_sub: 'sub_1'
+  log_dir: 'log'
+
+
+
+
+

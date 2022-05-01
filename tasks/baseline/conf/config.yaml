@@ -1,0 +1,58 @@
+
+basic:
+  seed: 2022
+  data_path: '../../data/data.pkl'
+  target_sub: 'sub_4'
+  model: 'LinearSVC'
+  log_file: 'baseline.log'
+
+model:
+  SVC:
+    C: 1e-4
+    kernel: 'linear'
+    degree: 3
+    tol: 1e-4
+    cache_size: 10240
+    verbose: 0
+    gamma: 'auto'
+    decision_function_shape: 'ovr'
+
+  LR:
+    C: 1e-4
+    tol: 1e-4
+    solver: 'lbfgs'
+    max_iter: 1000
+    multi_class: 'ovr'
+    verbose: 0
+    n_cpu: 3
+
+  ABC:
+    n_estimators: 100
+    learning_rate: 1.0
+    algorithm: 'SAMME.R'
+
+  LSVC:
+    C: 1e-5
+    tol: 1e-5
+    loss: 'hinge'
+    max_iter: 10000
+    multi_class: 'ovr'
+    verbose: 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
