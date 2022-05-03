@@ -16,6 +16,7 @@ SeedSample = namedtuple(
     ]
 )
 
+
 class SeedDataset(Dataset):
     data_path: str
     subject: str
