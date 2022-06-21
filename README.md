@@ -2,7 +2,7 @@
 
 This is the second assignment of the course CS7327 at ShangHai Jiao Tong University, 
 which focuses on transfer learning and domain adaptation approaches in emotion recognition tasks. 
-We use 5 out of 15 subjects in SJTU Emotion EEG Dataset(SEED), for more information, 
+We use all 15 subjects in SJTU Emotion EEG Dataset(SEED), for more information, 
 please visit [SEED Webpage](https://bcmi.sjtu.edu.cn/home/seed/index.html).
 
 
