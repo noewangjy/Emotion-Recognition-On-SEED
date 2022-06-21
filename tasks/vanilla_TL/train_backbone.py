@@ -5,7 +5,7 @@ import torch
 import numpy as np
 import pytorch_lightning as pl
 import pytorch_lightning.loggers
-from src.models.modeling_vanilla_TL import BackboneModel, SEEDClassifier
+from src.models.Vanilla_TL import BackboneModel, SEEDClassifier
 from src.utils.dataset import SeedDatasetForTLBackbone, SeedDatasetForTLClassifier
 from torch.utils.data import DataLoader
 

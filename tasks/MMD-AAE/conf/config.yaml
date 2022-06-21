@@ -1,0 +1,29 @@
+basic:
+  seed: 2022
+  data_path: '../../data/de_LDS_data.pkl'
+  target_sub: 'sub_0'
+  log_dir: 'log'
+  num_subjects: 15
+
+model:
+  input_dim: 310
+  hidden_dim: 128
+  dropout: 0.1
+  num_classes: 3
+
+
+train:
+  batch_size: 64
+  num_epochs: 200
+  adversarial_lr: 1e-3
+  model_lr: 1e-3
+  task_weight: 1
+  mmd_weight: 1
+  adv_weight: 0.1
+  decoder_weight: 0.1
+  workers: 4
+
+
+
+
+

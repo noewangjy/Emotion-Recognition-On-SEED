@@ -4,7 +4,7 @@ from torch import Tensor as T
 import pytorch_lightning as pl
 import torch.nn as nn
 import torch.nn.functional as F
-from src.utils.dataset import SeedSample
+from src.utils.dataset import DANNSample
 from omegaconf import DictConfig
 import numpy as np
 
@@ -51,11 +51,11 @@ class LabelPredictor(nn.Module):
             nn.Linear(in_features=64, out_features=64),
             nn.PReLU(),
             nn.Linear(in_features=64, out_features=cfg.model.num_classes),
-            nn.Softmax(dim=1),
         )
 
     def forward(self, x: T):
-        return self.model(x)
+        output = self.model(x)
+        return F.log_softmax(output, dim=1)
 
 
 class DomainDiscriminator(nn.Module):
@@ -67,13 +67,13 @@ class DomainDiscriminator(nn.Module):
             nn.Linear(in_features=64, out_features=64),
             nn.PReLU(),
             nn.Linear(in_features=64, out_features=2),
-            nn.Softmax(dim=1),
         )
         self.gradient_reverser = ReverseGradientLayer()
 
     def forward(self, x: T, alpha: float):
         x = self.gradient_reverser.apply(x, alpha)
-        return self.model(x)
+        output = self.model(x)
+        return F.log_softmax(output, dim=1)
 
 
 class DANN(pl.LightningModule):
@@ -104,26 +104,35 @@ class DANN(pl.LightningModule):
         domain_output = self.domain_discriminator(feature, adaptation_param)
         return class_output, domain_output
 
-    def training_step(self, sample_batch: SeedSample, batch_idx: int):
+    def training_step(self, sample_batch: DANNSample, batch_idx: int):
         optimizer = self.optimizers(use_pl_optimizer=True)
 
-        # calculate lambda(alpha) for this step
-        p: float = self.epoch_idx / self.cfg.train.num_epochs
+        # Calculate the progress of training
+        progress: float = self.epoch_idx / self.cfg.train.num_epochs
+
+        # Adjust learning_rate each epoch
+        if self.cfg.train.adjust_learning_rate:
+            current_lr = self.cfg.train.learning_rate / (1.0 + self.cfg.train.alpha * progress) ** self.cfg.train.beta
+            for param_group in optimizer.param_groups:
+                param_group['lr'] = current_lr
+            self.log("lr", current_lr)
+
+        # calculate lambda(adaptation_param) for this step
         if self.cfg.model.adaptation_param == 'auto':
-            alpha: float = 2. / (1 + np.exp(-10. * p)) - 1.
+            adaptation_param: float = 2. / (1 + np.exp(-self.cfg.train.gamma * progress)) - 1.
         else:
-            alpha = self.cfg.model.adaptation_param
-        self.log('alpha', alpha)
+            adaptation_param = self.cfg.model.adaptation_param
+        self.log('adaptation_param', adaptation_param)
 
         data = sample_batch.data
         class_label = sample_batch.class_label
         domain_label = sample_batch.domain_label
         source_mask = (domain_label == 0)
 
-        class_pred, domain_pred = self.forward(data, alpha)
+        class_pred, domain_pred = self.forward(data, adaptation_param)
 
-        class_loss = F.cross_entropy(class_pred[source_mask], class_label[source_mask], reduction='mean')
-        domain_loss = F.cross_entropy(domain_pred, domain_label, reduction='mean')
+        class_loss = F.nll_loss(class_pred[source_mask], class_label[source_mask])
+        domain_loss = F.nll_loss(domain_pred, domain_label)
         domain_accuracy = (torch.argmax(domain_pred.detach(), dim=1) == domain_label).sum()/domain_label.size(0)
         class_accuracy = (torch.argmax(class_pred.detach()[source_mask], dim=1) == class_label[source_mask]).sum()/class_label[source_mask].size(0)
 
@@ -158,13 +167,13 @@ class DANN(pl.LightningModule):
         loss.backward()
         return
 
-    def validation_step(self, sample_batch: SeedSample, batch_idx) -> Dict:
+    def validation_step(self, sample_batch: DANNSample, batch_idx) -> Dict:
         data = sample_batch.data
         class_label = sample_batch.class_label
         class_output, _ = self.forward(data, self.cfg.model.adaptation_param)
         class_pred = torch.argmax(class_output, dim=1)
         accuracy = (class_pred == class_label).detach().sum()/len(class_label)
-        loss = F.cross_entropy(class_output, class_label, reduction='mean')
+        loss = F.nll_loss(class_output, class_label)
 
         self.log('val_step_loss', loss.detach())
         return {
@@ -177,5 +186,4 @@ class DANN(pl.LightningModule):
         epoch_accuracy = torch.tensor([x['accuracy'] for x in outputs]).mean()
         self.log('val_epoch_loss', epoch_loss)
         self.log('val_epoch_accuracy', epoch_accuracy)
-
-
+        return

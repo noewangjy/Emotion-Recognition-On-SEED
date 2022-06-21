@@ -5,7 +5,7 @@ import torch
 import numpy as np
 import pytorch_lightning as pl
 import pytorch_lightning.loggers
-from src.models.modeling_dann import DANN
+from src.models.DANN import DANN
 from src.utils.dataset import SeedDatasetForDANN
 from torch.utils.data import DataLoader
 

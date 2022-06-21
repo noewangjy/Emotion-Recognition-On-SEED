@@ -1,6 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, LinearSVC
-from src.utils.dataset import SeedDatasetForDANN
+from src.utils.dataset import SeedDataset
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import AdaBoostClassifier
 import numpy as np
@@ -15,10 +15,12 @@ from omegaconf import OmegaConf
 def run(cfg: DictConfig):
     # np.random.seed(cfg.basic.seed)
     data_path = to_absolute_path(cfg.basic.data_path)
-    dataset = SeedDatasetForDANN(
+    dataset = SeedDataset(
         data_path=data_path,
         target_subject=cfg.basic.target_sub,
-        mode='train'
+        do_quantization=cfg.basic.do_quantization,
+        quantization_level=cfg.basic.quantization_level,
+        do_normalization=cfg.basic.do_normalization,
     )
     model = None
 
@@ -60,10 +62,16 @@ def run(cfg: DictConfig):
             max_iter=cfg.model.LSVC.max_iter,
         )
 
-    source_data = dataset.source_data.numpy()
-    source_labels = dataset.source_class_labels.numpy()
-    target_data = dataset.target_data.numpy()
-    target_labels = dataset.target_class_labels.numpy()
+    if cfg.basic.do_quantization:
+        source_data = dataset.quantized_source_data.numpy() # (3394*4, 310)
+        source_labels = dataset.source_class_labels.numpy() # (3397*4, )
+        target_data = dataset.quantized_target_data.numpy()  # (3394, 310)
+        target_labels = dataset.target_class_labels.numpy() # (3394, )
+    else:
+        source_data = dataset.source_data.numpy() # (3394*4, 310)
+        source_labels = dataset.source_class_labels.numpy() # (3397*4, )
+        target_data = dataset.target_data.numpy()  # (3394, 310)
+        target_labels = dataset.target_class_labels.numpy() # (3394, )
 
     scaler = StandardScaler()
     scaler.fit(source_data)
@@ -83,10 +91,7 @@ def run(cfg: DictConfig):
             f.write(f"{cfg.basic.model},{cfg.basic.target_sub},{cfg.model.ABC.n_estimators},{cfg.model.ABC.learning_rate},{cfg.model.ABC.algorithm},{accuracy}\n")
         elif cfg.basic.model == 'LinearSVC':
             f.write(f"{cfg.basic.model},{cfg.basic.target_sub},{cfg.model.LSVC.C},{cfg.model.LSVC.tol},{cfg.model.LSVC.loss},{accuracy}\n")
-
-
-
-
+    print(f"{cfg.basic.model},{cfg.basic.target_sub},{accuracy}")
 
 
 if __name__ == '__main__':

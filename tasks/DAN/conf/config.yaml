@@ -1,0 +1,21 @@
+model:
+  input_dim: 310
+  num_classes: 3
+  mmd_biased: False
+
+
+train:
+  num_epochs: 50
+  learning_rate: 1e-3
+  weight_decay: 0.0
+  batch_size: 128
+  workers: 8
+
+
+basic:
+  seed: 2022
+  data_path: '../../data/de_mov_data.pkl'
+  target_sub: 'sub_2'
+  log_dir: 'log'
+
+

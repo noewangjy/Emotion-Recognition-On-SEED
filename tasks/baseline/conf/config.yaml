@@ -1,9 +1,14 @@
 
 basic:
   seed: 2022
-  data_path: '../../data/data.pkl'
+  data_path: '../../data/de_LDS_data.pkl'
   target_sub: 'sub_4'
-  model: 'LinearSVC'
+  train_on_source: true
+  train_ratio: 0.8
+  do_quantization: false
+  do_normalization: true
+  quantization_level: 100
+  model: 'LR'
   log_file: 'baseline.log'
 
 model:
@@ -12,7 +17,7 @@ model:
     kernel: 'linear'
     degree: 3
     tol: 1e-4
-    cache_size: 10240
+    cache_size: 40960
     verbose: 0
     gamma: 'auto'
     decision_function_shape: 'ovr'

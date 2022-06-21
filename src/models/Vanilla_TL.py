@@ -3,10 +3,10 @@ import torch
 from torch import Tensor as T
 import pytorch_lightning as pl
 import torch.nn.functional as F
-from src.utils.dataset import SeedSample
+from src.utils.dataset import DANNSample
 from omegaconf import DictConfig
-from src.models.modeling_dann import FeatureExtractor
-from src.models.modeling_dann import LabelPredictor
+from src.models.DANN import FeatureExtractor
+from src.models.DANN import LabelPredictor
 from hydra.utils import to_absolute_path
 import os
 
@@ -36,7 +36,7 @@ class BackboneModel(pl.LightningModule):
         class_output = self.label_predictor(feature)
         return class_output
 
-    def training_step(self, sample_batch: SeedSample, batch_idx: int):
+    def training_step(self, sample_batch: DANNSample, batch_idx: int):
         optimizer = self.optimizers(use_pl_optimizer=True)
 
         data = sample_batch.data
@@ -65,7 +65,7 @@ class BackboneModel(pl.LightningModule):
         self.log('train_epoch_loss', epoch_loss)
         self.log('train_epoch_acc', epoch_acc)
 
-    def validation_step(self, sample_batch: SeedSample, batch_idx: int) -> Dict:
+    def validation_step(self, sample_batch: DANNSample, batch_idx: int) -> Dict:
         data = sample_batch.data
         label = sample_batch.class_label
         output = self.forward(data)
@@ -116,7 +116,7 @@ class SEEDClassifier(pl.LightningModule):
         class_output = self.label_predictor(feature)
         return class_output
 
-    def training_step(self, sample_batch: SeedSample, batch_idx: int):
+    def training_step(self, sample_batch: DANNSample, batch_idx: int):
         optimizer = self.optimizers(use_pl_optimizer=True)
 
         data = sample_batch.data
@@ -145,7 +145,7 @@ class SEEDClassifier(pl.LightningModule):
         self.log('train_epoch_loss', epoch_loss)
         self.log('train_epoch_acc', epoch_acc)
 
-    def validation_step(self, sample_batch: SeedSample, batch_idx: int) -> Dict:
+    def validation_step(self, sample_batch: DANNSample, batch_idx: int) -> Dict:
         data = sample_batch.data
         label = sample_batch.class_label
         output = self.forward(data)

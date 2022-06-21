@@ -1,0 +1,5 @@
+data/*
+docs/*
+.idea
+*.DS_Store
+tasks/test.py
