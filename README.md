@@ -33,3 +33,12 @@ In this assignment, our work are summarized as follows:
 > Please note that the pre-trained checkpoints should by manually added to `task/vanilla_TL/backbone_checkpoints`, 
 > You should copy the checkpoints from `hydra` outputs.
 
+## DAN
+
+- To run a DAN model, run the script `tasks/DAN/run.sh`
+- Hyper-parameters can be configured in `tasks/DAN/conf/config.yaml`
+
+## MMD-AAE
+
+- To run a MMD-AAE model, run the script `tasks/MMD-AAE/run.sh`
+- Hyper-parameters can be configured in `tasks/MMD-AAE/conf/config.yaml`
